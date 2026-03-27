@@ -13,6 +13,7 @@ from agents.scraper_agent import ScraperAgent
 from agents.eligibility_agent import EligibilityAgent
 from agents.document_agent import DocumentAgent
 from agents.email_agent import EmailAgent
+from agents.payment_agent import PaymentAgent
 
 # Load environment variables
 load_dotenv()
@@ -348,3 +349,23 @@ def get_dashboard():
             return HTMLResponse(content="<h1>Dashboard file not found</h1><p>Please ensure dashboard.html exists</p>")
     except Exception as e:
         return HTMLResponse(content=f"<h1>Error loading dashboard</h1><p>{str(e)}</p>")
+
+# ============================================
+# PAYMENT AGENT ENDPOINTS
+# ============================================
+
+@app.get("/plans")
+def get_plans():
+    """Get available subscription plans"""
+    agent = PaymentAgent()
+    return {
+        "success": True,
+        "plans": agent.get_plans()
+    }
+
+@app.post("/checkout/{user_id}/{plan}")
+def create_checkout(user_id: str, plan: str):
+    """Create Stripe checkout session"""
+    agent = PaymentAgent()
+    result = agent.create_checkout_session(user_id, plan)
+    return result
