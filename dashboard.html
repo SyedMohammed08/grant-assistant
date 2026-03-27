@@ -18,21 +18,18 @@
             color: #f1f5f9;
         }
         
-        /* Gradient Background Animation */
         @keyframes gradientShift {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
         
-        /* Container */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
         
-        /* Header */
         .header {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(10px);
@@ -58,7 +55,6 @@
             font-size: 14px;
         }
         
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -114,7 +110,6 @@
             font-weight: 500;
         }
         
-        /* User Input Section */
         .user-section {
             background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(10px);
@@ -174,7 +169,6 @@
             box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
         }
         
-        /* Section Cards */
         .section {
             background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(10px);
@@ -205,14 +199,13 @@
             font-size: 24px;
         }
         
-        /* Cards Grid */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
         }
         
-        .grant-card, .match-card, .app-card {
+        .grant-card, .match-card, .app-card, .plan-card {
             background: #1e293b;
             border-radius: 16px;
             padding: 20px;
@@ -220,7 +213,7 @@
             border: 1px solid #334155;
         }
         
-        .grant-card:hover, .match-card:hover, .app-card:hover {
+        .grant-card:hover, .match-card:hover, .app-card:hover, .plan-card:hover {
             transform: translateY(-2px);
             border-color: #3b82f6;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
@@ -279,6 +272,43 @@
             border-top: 1px solid #334155;
         }
         
+        .plan-price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #22c55e;
+            margin: 15px 0;
+        }
+        
+        .plan-price small {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        
+        .plan-features {
+            margin: 15px 0;
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        
+        .btn-subscribe {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .btn-subscribe:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+        }
+        
         .loading {
             text-align: center;
             padding: 60px;
@@ -294,7 +324,6 @@
             margin: 20px 0;
         }
         
-        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -310,7 +339,6 @@
             animation: fadeInUp 0.5s ease-out;
         }
         
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px;
@@ -322,7 +350,6 @@
             margin-bottom: 16px;
         }
         
-        /* Footer */
         .footer {
             text-align: center;
             padding: 30px;
@@ -332,7 +359,6 @@
             margin-top: 20px;
         }
         
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -385,6 +411,8 @@
             </div>
         </div>
         
+        <div id="plansContainer"></div>
+        
         <div id="dashboardContent">
             <div class="loading">
                 <div>✨ Enter your User ID to get started</div>
@@ -400,6 +428,77 @@
     <script>
         const API_URL = 'https://grant-assistant.onrender.com';
         
+        async function loadPlans() {
+            const plansContainer = document.getElementById('plansContainer');
+            if (!plansContainer) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/plans`);
+                const data = await response.json();
+                
+                if (data.success && data.plans) {
+                    let plansHtml = `
+                        <div class="section fade-in">
+                            <div class="section-header">
+                                <div class="section-title">
+                                    <span>💳</span> Choose Your Plan
+                                </div>
+                            </div>
+                            <div class="cards-grid">
+                    `;
+                    
+                    for (const [key, plan] of Object.entries(data.plans)) {
+                        plansHtml += `
+                            <div class="plan-card">
+                                <div class="card-title">${plan.name}</div>
+                                <div class="plan-price">
+                                    $${plan.price}<small>/month</small>
+                                </div>
+                                <div class="plan-features">
+                                    ${plan.features.map(f => `✓ ${f}<br>`).join('')}
+                                </div>
+                                <button class="btn-subscribe" onclick="subscribe('${key}')">
+                                    Subscribe
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
+                    plansHtml += `
+                            </div>
+                        </div>
+                    `;
+                    
+                    plansContainer.innerHTML = plansHtml;
+                }
+            } catch (error) {
+                console.error('Error loading plans:', error);
+            }
+        }
+        
+        async function subscribe(plan) {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                alert('Please enter your User ID first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/checkout/${userId}/${plan}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success && data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error: ' + (data.error || 'Could not create checkout session'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
         async function loadDashboard() {
             const userId = document.getElementById('userId').value.trim();
             if (!userId) {
@@ -411,7 +510,6 @@
             dashboardDiv.innerHTML = '<div class="loading"><div>🔄 Loading your dashboard...</div></div>';
             
             try {
-                // Fetch all data in parallel
                 const [grantsRes, matchesRes, appsRes] = await Promise.all([
                     fetch(`${API_URL}/grants`),
                     fetch(`${API_URL}/matches/${userId}`),
@@ -422,12 +520,10 @@
                 const matchesData = await matchesRes.json();
                 const appsData = await appsRes.json();
                 
-                // Update stats
                 document.getElementById('grantCount').textContent = grantsData.count || 0;
                 document.getElementById('matchCount').textContent = matchesData.count || 0;
                 document.getElementById('appCount').textContent = appsData.count || 0;
                 
-                // Build HTML
                 let html = `
                     <div class="section fade-in">
                         <div class="section-header">
@@ -540,12 +636,13 @@
             return div.innerHTML;
         }
         
-        // Allow Enter key to submit
         document.getElementById('userId')?.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 loadDashboard();
             }
         });
+        
+        loadPlans();
     </script>
 </body>
 </html>
