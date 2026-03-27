@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grant Assistant Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        /* Cards */
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .grant-card, .match-card, .app-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .grant-card:hover, .match-card:hover, .app-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .grant-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .grant-agency {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .grant-amount {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .match-score {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-draft { background: #ffc107; color: #333; }
+        .status-submitted { background: #17a2b8; color: white; }
+        .status-approved { background: #28a745; color: white; }
+        .status-rejected { background: #dc3545; color: white; }
+        
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        
+        .button:hover {
+            background: #5a67d8;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            color: #dc3545;
+            padding: 10px;
+            background: #ffe6e6;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Grant Assistant Dashboard</h1>
+            <p class="subtitle">Your AI-powered grant discovery and application system</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="grantCount">0</div>
+                <div class="stat-label">Available Grants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="matchCount">0</div>
+                <div class="stat-label">Your Matches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="appCount">0</div>
+                <div class="stat-label">Applications</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📊 User ID</div>
+            <div class="input-group">
+                <label>Enter your User ID:</label>
+                <input type="text" id="userId" placeholder="Paste your Supabase user ID here">
+                <button class="button" onclick="loadDashboard()">Load My Dashboard</button>
+            </div>
+        </div>
+        
+        <div id="dashboardContent">
+            <div class="loading">Enter your User ID to get started</div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8000';
+        
+        async function loadDashboard() {
+            const userId = document.getElementById('userId').value;
+            if (!userId) {
+                alert('Please enter your User ID');
+                return;
+            }
+            
+            document.getElementById('dashboardContent').innerHTML = '<div class="loading">Loading your dashboard...</div>';
+            
+            try {
+                // Load all grants
+                const grantsRes = await fetch(`${API_URL}/grants`);
+                const grantsData = await grantsRes.json();
+                
+                // Load user matches
+                const matchesRes = await fetch(`${API_URL}/matches/${userId}`);
+                const matchesData = await matchesRes.json();
+                
+                // Load user applications
+                const appsRes = await fetch(`${API_URL}/applications/${userId}`);
+                const appsData = await appsRes.json();
+                
+                // Update stats
+                document.getElementById('grantCount').textContent = grantsData.count || 0;
+                document.getElementById('matchCount').textContent = matchesData.count || 0;
+                document.getElementById('appCount').textContent = appsData.count || 0;
+                
+                // Build dashboard HTML
+                let html = `
+                    <div class="section">
+                        <div class="section-title">🎯 Top Grant Matches</div>
+                        ${matchesData.matches && matchesData.matches.length > 0 ? 
+                            matchesData.matches.slice(0, 5).map(match => `
+                                <div class="match-card">
+                                    <div class="grant-title">${match.opportunities?.title || 'Unknown Grant'}</div>
+                                    <div class="grant-agency">${match.opportunities?.agency || 'Unknown Agency'}</div>
+                                    <div class="match-score">${match.score}% Match</div>
+                                </div>
+                            `).join('') : 
+                            '<p>No matches found. Run the eligibility check first!</p>'
+                        }
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">📝 Your Applications</div>
+                        ${appsData.applications && appsData.applications.length > 0 ?
+                            appsData.applications.map(app => `
+                                <div class="app-card">
+                                    <div class="grant-title">${app.opportunities?.title || 'Unknown Grant'}</div>
+                                    <div class="grant-agency">${app.opportunities?.agency || 'Unknown Agency'}</div>
+                                    <div class="status-badge status-${app.status}">${app.status}</div>
+                                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                                        Created: ${new Date(app.created_at).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            `).join('') :
+                            '<p>No applications yet. Create one from the API!</p>'
+                        }
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">💼 All Available Grants</div>
+                        ${grantsData.grants && grantsData.grants.length > 0 ?
+                            grantsData.grants.slice(0, 10).map(grant => `
+                                <div class="grant-card">
+                                    <div class="grant-title">${grant.title}</div>
+                                    <div class="grant-agency">${grant.agency || 'Unknown Agency'}</div>
+                                    <div class="grant-amount">
+                                        ${grant.amount_min && grant.amount_max ? 
+                                            `$${grant.amount_min.toLocaleString()} - $${grant.amount_max.toLocaleString()}` : 
+                                            'Amount not specified'
+                                        }
+                                    </div>
+                                    <div style="font-size: 12px; color: #666; margin-top: 8px;">
+                                        Deadline: ${grant.deadline || 'Not specified'}
+                                    </div>
+                                </div>
+                            `).join('') :
+                            '<p>No grants found. Run the scraper first!</p>'
+                        }
+                    </div>
+                `;
+                
+                document.getElementById('dashboardContent').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('dashboardContent').innerHTML = `
+                    <div class="error">
+                        Error loading dashboard: ${error.message}<br>
+                        Make sure your server is running at ${API_URL}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

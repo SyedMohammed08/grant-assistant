@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+supabase
+python-dotenv
+pydantic
+httpx
+requests
+beautifulsoup4
+schedule
+openai
+langchain
+langchain-community
+langchain-openai
