@@ -330,42 +330,48 @@ def notify_all_users():
 
 
 # ============================================
-# DASHBOARD ENDPOINT
-# ============================================
-
-@app.get("/dashboard", response_class=HTMLResponse)
-def get_dashboard():
-    """Serve the dashboard HTML page"""
-    import os
-    try:
-        # Check if dashboard.html exists
-        if os.path.exists("dashboard.html"):
-            with open("dashboard.html", "r", encoding="utf-8") as f:
-                html_content = f.read()
-            # Replace localhost with production URL
-            html_content = html_content.replace("http://localhost:8000", "")
-            return HTMLResponse(content=html_content)
-        else:
-            return HTMLResponse(content="<h1>Dashboard file not found</h1><p>Please ensure dashboard.html exists</p>")
-    except Exception as e:
-        return HTMLResponse(content=f"<h1>Error loading dashboard</h1><p>{str(e)}</p>")
-
-# ============================================
 # PAYMENT AGENT ENDPOINTS
 # ============================================
 
 @app.get("/plans")
 def get_plans():
     """Get available subscription plans"""
-    agent = PaymentAgent()
-    return {
-        "success": True,
-        "plans": agent.get_plans()
-    }
+    try:
+        agent = PaymentAgent()
+        return {
+            "success": True,
+            "plans": agent.get_plans()
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 @app.post("/checkout/{user_id}/{plan}")
 def create_checkout(user_id: str, plan: str):
-    """Create Stripe checkout session"""
-    agent = PaymentAgent()
-    result = agent.create_checkout_session(user_id, plan)
-    return result
+    """Create Stripe checkout session for subscription"""
+    try:
+        agent = PaymentAgent()
+        result = agent.create_checkout_session(user_id, plan)
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+# ============================================
+# DASHBOARD ENDPOINT
+# ============================================
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def get_dashboard():
+    """Serve the dashboard HTML page"""
+    try:
+        with open("dashboard.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading dashboard</h1><p>{str(e)}</p>")
