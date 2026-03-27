@@ -77,7 +77,9 @@ def health_check():
         "status": "healthy",
         "database": db_status
     }
-
+@app.get("/test")
+def test_endpoint():
+    return {"message": "Test endpoint works!"}
 
 # ============================================
 # USER AUTHENTICATION
